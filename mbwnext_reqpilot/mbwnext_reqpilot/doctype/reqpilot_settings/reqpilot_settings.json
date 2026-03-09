@@ -1,0 +1,94 @@
+{
+ "actions": [],
+ "creation": "2026-03-09 00:00:00.000000",
+ "doctype": "DocType",
+ "engine": "InnoDB",
+ "field_order": [
+  "claude_section",
+  "claude_api_key",
+  "claude_model",
+  "column_break_1",
+  "max_tokens",
+  "temperature",
+  "indexer_section",
+  "bench_path",
+  "base_apps",
+  "last_indexed"
+ ],
+ "fields": [
+  {
+   "fieldname": "claude_section",
+   "fieldtype": "Section Break",
+   "label": "Claude AI Settings"
+  },
+  {
+   "fieldname": "claude_api_key",
+   "fieldtype": "Password",
+   "label": "Claude API Key",
+   "reqd": 0
+  },
+  {
+   "default": "claude-sonnet-4-6",
+   "fieldname": "claude_model",
+   "fieldtype": "Select",
+   "label": "Model",
+   "options": "claude-sonnet-4-6\nclaude-opus-4-6\nclaude-haiku-4-5-20251001"
+  },
+  {
+   "fieldname": "column_break_1",
+   "fieldtype": "Column Break"
+  },
+  {
+   "default": "8192",
+   "fieldname": "max_tokens",
+   "fieldtype": "Int",
+   "label": "Max Tokens"
+  },
+  {
+   "default": "0.3",
+   "fieldname": "temperature",
+   "fieldtype": "Float",
+   "label": "Temperature"
+  },
+  {
+   "fieldname": "indexer_section",
+   "fieldtype": "Section Break",
+   "label": "App Indexer Settings"
+  },
+  {
+   "fieldname": "bench_path",
+   "fieldtype": "Data",
+   "label": "Bench Apps Path",
+   "description": "Đường dẫn tới thư mục apps trong bench, ví dụ: /home/user/bench/apps"
+  },
+  {
+   "fieldname": "base_apps",
+   "fieldtype": "Small Text",
+   "label": "Base Apps (mỗi dòng 1 app)",
+   "description": "Danh sách app nền tảng cần index, ví dụ: mbwnext_advanced_selling"
+  },
+  {
+   "fieldname": "last_indexed",
+   "fieldtype": "Datetime",
+   "label": "Last Indexed",
+   "read_only": 1
+  }
+ ],
+ "issingle": 1,
+ "links": [],
+ "modified": "2026-03-09 00:00:00.000000",
+ "modified_by": "Administrator",
+ "module": "MBWNext Reqpilot",
+ "name": "Reqpilot Settings",
+ "owner": "Administrator",
+ "permissions": [
+  {
+   "role": "System Manager",
+   "read": 1,
+   "write": 1
+  }
+ ],
+ "sort_field": "modified",
+ "sort_order": "DESC",
+ "track_changes": 0
+}

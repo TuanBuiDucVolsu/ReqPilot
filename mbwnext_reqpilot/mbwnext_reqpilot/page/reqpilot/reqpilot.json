@@ -1,0 +1,15 @@
+{
+ "creation": "2026-03-09 00:00:00.000000",
+ "doctype": "Page",
+ "modified": "2026-03-09 00:00:00.000000",
+ "modified_by": "Administrator",
+ "module": "MBWNext Reqpilot",
+ "name": "reqpilot",
+ "owner": "Administrator",
+ "page_name": "reqpilot",
+ "restrict_to_domain": null,
+ "roles": [{"role": "All"}],
+ "standard": "Yes",
+ "system_page": 0,
+ "title": "ReqPilot – BA AI"
+}

@@ -1,0 +1,96 @@
+{
+ "actions": [],
+ "creation": "2026-03-09 00:00:00.000000",
+ "doctype": "DocType",
+ "engine": "InnoDB",
+ "field_order": [
+  "req_id", "requirement_text", "gap_status", "column_break_1",
+  "mapped_app", "mapped_doctype", "mapped_field",
+  "effort_days", "priority", "clarified",
+  "notes_section", "clarification_notes", "dev_notes"
+ ],
+ "fields": [
+  {
+   "fieldname": "req_id",
+   "fieldtype": "Data",
+   "in_list_view": 1,
+   "label": "Mã YC"
+  },
+  {
+   "fieldname": "requirement_text",
+   "fieldtype": "Small Text",
+   "in_list_view": 1,
+   "label": "Yêu cầu",
+   "reqd": 1
+  },
+  {
+   "fieldname": "gap_status",
+   "fieldtype": "Select",
+   "in_list_view": 1,
+   "label": "Trạng thái",
+   "options": "\n🔴 MỚI\n🟡 PHẦN\n🟢 CÓ SẴN"
+  },
+  {
+   "fieldname": "column_break_1",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "mapped_app",
+   "fieldtype": "Data",
+   "in_list_view": 1,
+   "label": "App"
+  },
+  {
+   "fieldname": "mapped_doctype",
+   "fieldtype": "Data",
+   "label": "Doctype"
+  },
+  {
+   "fieldname": "mapped_field",
+   "fieldtype": "Data",
+   "label": "Field / Feature"
+  },
+  {
+   "fieldname": "effort_days",
+   "fieldtype": "Float",
+   "label": "Effort (ngày)"
+  },
+  {
+   "fieldname": "priority",
+   "fieldtype": "Select",
+   "label": "Ưu tiên",
+   "options": "\nCao\nTrung bình\nThấp"
+  },
+  {
+   "fieldname": "clarified",
+   "fieldtype": "Check",
+   "label": "Đã làm rõ"
+  },
+  {
+   "fieldname": "notes_section",
+   "fieldtype": "Section Break",
+   "label": "Ghi chú"
+  },
+  {
+   "fieldname": "clarification_notes",
+   "fieldtype": "Text",
+   "label": "Ghi chú làm rõ (từ chat)"
+  },
+  {
+   "fieldname": "dev_notes",
+   "fieldtype": "Text",
+   "label": "Ghi chú kỹ thuật"
+  }
+ ],
+ "istable": 1,
+ "links": [],
+ "modified": "2026-03-09 00:00:00.000000",
+ "modified_by": "Administrator",
+ "module": "MBWNext Reqpilot",
+ "name": "SRS Requirement",
+ "owner": "Administrator",
+ "permissions": [],
+ "sort_field": "modified",
+ "sort_order": "DESC",
+ "track_changes": 0
+}

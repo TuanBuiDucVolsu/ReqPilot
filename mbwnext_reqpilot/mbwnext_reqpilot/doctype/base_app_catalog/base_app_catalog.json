@@ -1,0 +1,88 @@
+{
+ "actions": [],
+ "autoname": "field:app_name",
+ "creation": "2026-03-09 00:00:00.000000",
+ "doctype": "DocType",
+ "engine": "InnoDB",
+ "field_order": [
+  "app_name",
+  "app_title",
+  "version",
+  "column_break_1",
+  "description",
+  "last_indexed",
+  "features_section",
+  "features"
+ ],
+ "fields": [
+  {
+   "fieldname": "app_name",
+   "fieldtype": "Data",
+   "in_list_view": 1,
+   "label": "App Name",
+   "reqd": 1,
+   "unique": 1
+  },
+  {
+   "fieldname": "app_title",
+   "fieldtype": "Data",
+   "in_list_view": 1,
+   "label": "App Title"
+  },
+  {
+   "fieldname": "version",
+   "fieldtype": "Data",
+   "in_list_view": 1,
+   "label": "Version"
+  },
+  {
+   "fieldname": "column_break_1",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "description",
+   "fieldtype": "Small Text",
+   "label": "Description"
+  },
+  {
+   "fieldname": "last_indexed",
+   "fieldtype": "Datetime",
+   "label": "Last Indexed",
+   "read_only": 1
+  },
+  {
+   "fieldname": "features_section",
+   "fieldtype": "Section Break",
+   "label": "Features & Doctypes"
+  },
+  {
+   "fieldname": "features",
+   "fieldtype": "Table",
+   "label": "Features",
+   "options": "App Feature"
+  }
+ ],
+ "links": [],
+ "modified": "2026-03-09 00:00:00.000000",
+ "modified_by": "Administrator",
+ "module": "MBWNext Reqpilot",
+ "name": "Base App Catalog",
+ "owner": "Administrator",
+ "permissions": [
+  {
+   "role": "System Manager",
+   "read": 1,
+   "write": 1,
+   "create": 1,
+   "delete": 1
+  },
+  {
+   "role": "All",
+   "read": 1
+  }
+ ],
+ "sort_field": "app_name",
+ "sort_order": "ASC",
+ "title_field": "app_title",
+ "track_changes": 0
+}

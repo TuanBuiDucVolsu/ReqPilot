@@ -1,0 +1,157 @@
+{
+ "actions": [],
+ "autoname": "naming_series:",
+ "creation": "2026-03-09 00:00:00.000000",
+ "doctype": "DocType",
+ "engine": "InnoDB",
+ "field_order": [
+  "naming_series",
+  "project_name",
+  "customer",
+  "status",
+  "column_break_1",
+  "custom_app_name",
+  "created_by_user",
+  "creation_date",
+  "apps_section",
+  "base_apps",
+  "requirements_section",
+  "requirement_files",
+  "requirement_text",
+  "chat_section",
+  "chat_messages",
+  "analysis_section",
+  "requirements",
+  "output_section",
+  "output_srs"
+ ],
+ "fields": [
+  {
+   "fieldname": "naming_series",
+   "fieldtype": "Select",
+   "label": "Series",
+   "options": "SRS-.YYYY.-.#####"
+  },
+  {
+   "fieldname": "project_name",
+   "fieldtype": "Data",
+   "in_list_view": 1,
+   "label": "Tên dự án",
+   "reqd": 1
+  },
+  {
+   "fieldname": "customer",
+   "fieldtype": "Data",
+   "in_list_view": 1,
+   "label": "Khách hàng"
+  },
+  {
+   "default": "Draft",
+   "fieldname": "status",
+   "fieldtype": "Select",
+   "in_list_view": 1,
+   "label": "Trạng thái",
+   "options": "Draft\nAnalyzing\nClarifying\nCompleted"
+  },
+  {
+   "fieldname": "column_break_1",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "custom_app_name",
+   "fieldtype": "Data",
+   "label": "Custom App Name",
+   "description": "Tên app custom sẽ tạo, ví dụ: mbwnext_tonhoathi"
+  },
+  {
+   "fieldname": "created_by_user",
+   "fieldtype": "Link",
+   "label": "BA phụ trách",
+   "options": "User"
+  },
+  {
+   "fieldname": "creation_date",
+   "fieldtype": "Date",
+   "label": "Ngày tạo"
+  },
+  {
+   "fieldname": "apps_section",
+   "fieldtype": "Section Break",
+   "label": "Base Apps khách hàng mua"
+  },
+  {
+   "fieldname": "base_apps",
+   "fieldtype": "Table",
+   "label": "Base Apps",
+   "options": "SRS Project App"
+  },
+  {
+   "fieldname": "requirements_section",
+   "fieldtype": "Section Break",
+   "label": "Tài liệu yêu cầu"
+  },
+  {
+   "fieldname": "requirement_files",
+   "fieldtype": "Attach",
+   "label": "File yêu cầu (PDF/Word)"
+  },
+  {
+   "fieldname": "requirement_text",
+   "fieldtype": "Long Text",
+   "label": "Hoặc nhập yêu cầu trực tiếp"
+  },
+  {
+   "fieldname": "chat_section",
+   "fieldtype": "Section Break",
+   "label": "Lịch sử hội thoại AI"
+  },
+  {
+   "fieldname": "chat_messages",
+   "fieldtype": "Table",
+   "label": "Chat Messages",
+   "options": "SRS Chat Message"
+  },
+  {
+   "fieldname": "analysis_section",
+   "fieldtype": "Section Break",
+   "label": "Kết quả phân tích Gap"
+  },
+  {
+   "fieldname": "requirements",
+   "fieldtype": "Table",
+   "label": "Requirements",
+   "options": "SRS Requirement"
+  },
+  {
+   "fieldname": "output_section",
+   "fieldtype": "Section Break",
+   "label": "File SRS đã sinh"
+  },
+  {
+   "fieldname": "output_srs",
+   "fieldtype": "Attach",
+   "label": "File SRS (DOCX)",
+   "read_only": 1
+  }
+ ],
+ "links": [],
+ "modified": "2026-03-09 00:00:00.000000",
+ "modified_by": "Administrator",
+ "module": "MBWNext Reqpilot",
+ "name": "SRS Project",
+ "owner": "Administrator",
+ "permissions": [
+  {
+   "role": "System Manager",
+   "read": 1, "write": 1, "create": 1, "delete": 1
+  },
+  {
+   "role": "All",
+   "read": 1, "write": 1, "create": 1
+  }
+ ],
+ "sort_field": "modified",
+ "sort_order": "DESC",
+ "title_field": "project_name",
+ "track_changes": 1
+}

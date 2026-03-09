@@ -1,0 +1,54 @@
+{
+ "actions": [],
+ "creation": "2026-03-09 00:00:00.000000",
+ "doctype": "DocType",
+ "engine": "InnoDB",
+ "field_order": [
+  "doctype_name",
+  "feature_type",
+  "column_break_1",
+  "feature_description",
+  "raw_json"
+ ],
+ "fields": [
+  {
+   "fieldname": "doctype_name",
+   "fieldtype": "Data",
+   "in_list_view": 1,
+   "label": "Doctype / Component"
+  },
+  {
+   "fieldname": "feature_type",
+   "fieldtype": "Select",
+   "in_list_view": 1,
+   "label": "Type",
+   "options": "Doctype\nCustom Field\nReport\nPage\nHook\nAPI"
+  },
+  {
+   "fieldname": "column_break_1",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "feature_description",
+   "fieldtype": "Small Text",
+   "label": "Description"
+  },
+  {
+   "fieldname": "raw_json",
+   "fieldtype": "Code",
+   "label": "Raw JSON (fields)",
+   "options": "JSON"
+  }
+ ],
+ "istable": 1,
+ "links": [],
+ "modified": "2026-03-09 00:00:00.000000",
+ "modified_by": "Administrator",
+ "module": "MBWNext Reqpilot",
+ "name": "App Feature",
+ "owner": "Administrator",
+ "permissions": [],
+ "sort_field": "modified",
+ "sort_order": "DESC",
+ "track_changes": 0
+}

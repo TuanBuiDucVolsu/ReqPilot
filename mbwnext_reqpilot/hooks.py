@@ -1,7 +1,7 @@
 app_name = "mbwnext_reqpilot"
-app_title = "MBWNext Reqpilot"
-app_publisher = "TuanBD"
-app_description = "BA AI"
+app_title = "MBWNext ReqPilot"
+app_publisher = "MBWD"
+app_description = "AI-powered BA tool for requirements analysis and SRS generation"
 app_email = "tuanbui@mbw.vn"
 app_license = "mit"
 
@@ -25,8 +25,7 @@ app_license = "mit"
 # ------------------
 
 # include js, css files in header of desk.html
-# app_include_css = "/assets/mbwnext_reqpilot/css/mbwnext_reqpilot.css"
-# app_include_js = "/assets/mbwnext_reqpilot/js/mbwnext_reqpilot.js"
+# (assets loaded lazily by the Page itself – no global include needed)
 
 # include js, css files in header of web template
 # web_include_css = "/assets/mbwnext_reqpilot/css/mbwnext_reqpilot.css"
@@ -40,7 +39,7 @@ app_license = "mit"
 # webform_include_css = {"doctype": "public/css/doctype.css"}
 
 # include js in page
-# page_js = {"page" : "public/js/file.js"}
+page_js = {"reqpilot": "public/js/reqpilot_app.js"}
 
 # include js in doctype views
 # doctype_js = {"doctype" : "public/js/doctype.js"}
@@ -82,8 +81,7 @@ app_license = "mit"
 # Installation
 # ------------
 
-# before_install = "mbwnext_reqpilot.install.before_install"
-# after_install = "mbwnext_reqpilot.install.after_install"
+after_install = "mbwnext_reqpilot.mbwnext_reqpilot.install.after_install"
 
 # Uninstallation
 # ------------
@@ -148,21 +146,17 @@ app_license = "mit"
 # Scheduled Tasks
 # ---------------
 
-# scheduler_events = {
-# 	"all": [
-# 		"mbwnext_reqpilot.tasks.all"
-# 	],
-# 	"daily": [
-# 		"mbwnext_reqpilot.tasks.daily"
-# 	],
-# 	"hourly": [
-# 		"mbwnext_reqpilot.tasks.hourly"
-# 	],
-# 	"weekly": [
-# 		"mbwnext_reqpilot.tasks.weekly"
-# 	],
-# 	"monthly": [
-# 		"mbwnext_reqpilot.tasks.monthly"
+scheduler_events = {
+    "daily": [
+        "mbwnext_reqpilot.mbwnext_reqpilot.services.app_indexer.index_all_apps"
+    ],
+}
+
+# scheduler_events_extra = {
+# 	"all": ["mbwnext_reqpilot.tasks.all"],
+# 	"hourly": ["mbwnext_reqpilot.tasks.hourly"],
+# 	"weekly": ["mbwnext_reqpilot.tasks.weekly"],
+# 	"monthly": ["mbwnext_reqpilot.tasks.monthly
 # 	],
 # }
 
