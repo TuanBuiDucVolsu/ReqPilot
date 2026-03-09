@@ -119,15 +119,10 @@
       },
 
       async openProject(name) {
-        frappe.show_progress("Đang tải project...", 0, 100, "Vui lòng chờ");
-        try {
-          this.project = await api.call("get_project", { project_name: name });
-          this.messages = await api.call("get_chat_history", { project_name: name });
-          this.view = "workspace";
-          this.$nextTick(() => this.scrollBottom());
-        } finally {
-          frappe.hide_progress();
-        }
+        this.project = await api.call("get_project", { project_name: name });
+        this.messages = await api.call("get_chat_history", { project_name: name });
+        this.view = "workspace";
+        this.$nextTick(() => this.scrollBottom());
       },
 
       // ── New Project ───────────────────────────────────────────
@@ -185,16 +180,29 @@
         this.isLoading = true;
         this.uploadedFileName = file.name;
         try {
-          const r = await new Promise((resolve, reject) => {
-            frappe.upload_file({
-              method: "upload_file",
-              args: { is_private: 0, doctype: "SRS Project", docname: this.project.name },
-              file,
-              callback: resolve,
-              error: reject,
-            });
+          const formData = new FormData();
+          formData.append("file", file, file.name);
+          formData.append("is_private", "0");
+          formData.append("doctype", "SRS Project");
+          formData.append("docname", this.project.name);
+
+          const headers = {};
+          if (frappe.csrf_token) {
+            headers["X-Frappe-CSRF-Token"] = frappe.csrf_token;
+          }
+
+          const resp = await fetch("/api/method/upload_file", {
+            method: "POST",
+            body: formData,
+            credentials: "same-origin",
+            headers,
           });
-          const fileUrl = r.message?.file_url || r.file_url;
+          if (!resp.ok) {
+            const txt = await resp.text();
+            throw new Error("Upload failed with status " + resp.status + ": " + txt);
+          }
+          const r = await resp.json();
+          const fileUrl = (r.message && r.message.file_url) || r.file_url;
           const extracted = await api.call("extract_file_text", {
             project_name: this.project.name,
             file_url: fileUrl,
@@ -202,6 +210,8 @@
           if (extracted.status === "ok") {
             frappe.show_alert({ message: `Đã đọc file: ${file.name}`, indicator: "green" });
             this.project.requirement_text = extracted.text + "...";
+          } else {
+            frappe.msgprint("Lỗi đọc file: " + (extracted.message || "Không xác định"));
           }
         } catch (e) {
           frappe.msgprint("Lỗi upload: " + e);
@@ -473,11 +483,13 @@
         <button class="rp-sidebar-btn success" @click="generateSRS" :disabled="isLoading||!totalReq">
           📄 Sinh file SRS
         </button>
-        <button v-if="project && project.output_srs"
-                class="rp-sidebar-btn"
-                @click="window.open(project.output_srs)">
+        <a v-if="project && project.output_srs"
+           class="rp-sidebar-btn"
+           :href="project.output_srs"
+           target="_blank"
+           rel="noopener">
           📥 Tải SRS
-        </button>
+        </a>
         <button class="rp-sidebar-btn" @click="clearChat" :disabled="isLoading">
           🗑 Xóa & làm lại
         </button>

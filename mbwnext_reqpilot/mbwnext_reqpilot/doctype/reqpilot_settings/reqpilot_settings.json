@@ -28,11 +28,11 @@
    "reqd": 0
   },
   {
-   "default": "claude-sonnet-4-6",
+   "default": "llama-3.3-70b-versatile",
    "fieldname": "claude_model",
    "fieldtype": "Select",
    "label": "Model",
-   "options": "claude-sonnet-4-6\nclaude-opus-4-6\nclaude-haiku-4-5-20251001"
+   "options": "llama-3.3-70b-versatile\nllama-3.1-8b-instant"
   },
   {
    "fieldname": "column_break_1",

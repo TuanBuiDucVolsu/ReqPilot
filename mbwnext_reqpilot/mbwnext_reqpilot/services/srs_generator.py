@@ -38,8 +38,10 @@ def generate(project_name: str) -> str:
 	# 2. Build DOCX
 	doc = _build_docx(project, srs_markdown)
 
-	# 3. Lưu file
-	file_name = f"SRS_{project_name}_{now_datetime().strftime('%Y%m%d_%H%M')}.docx"
+	# 3. Lưu file với tên SRS_TênDựÁn (đã làm sạch ký tự đặc biệt)
+	raw_name = project.project_name or project_name
+	safe_project_name = re.sub(r"[^\w\-]+", "_", raw_name).strip("_")
+	file_name = f"SRS_{safe_project_name}.docx"
 	site_files = get_files_path()
 	file_path = os.path.join(site_files, file_name)
 	doc.save(file_path)
@@ -56,9 +58,16 @@ def generate(project_name: str) -> str:
 	})
 	file_doc.insert(ignore_permissions=True)
 
-	project.output_srs = file_doc.file_url
-	project.status = "Completed"
-	project.save(ignore_permissions=True)
+	# 5. Cập nhật trường trên SRS Project (tránh TimestampMismatch bằng set_value)
+	frappe.db.set_value(
+		"SRS Project",
+		project_name,
+		{
+			"output_srs": file_doc.file_url,
+			"status": "Completed",
+		},
+		update_modified=True,
+	)
 	frappe.db.commit()
 
 	return file_doc.file_url

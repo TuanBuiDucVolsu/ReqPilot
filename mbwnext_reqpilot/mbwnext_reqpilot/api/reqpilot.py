@@ -111,9 +111,14 @@ def extract_file_text(project_name: str, file_url: str):
 
 		text = ""
 		if ext == ".pdf":
-			import fitz
-			with fitz.open(file_path) as pdf:
-				text = "\n".join(page.get_text() for page in pdf)
+			try:
+				from PyPDF2 import PdfReader
+			except ImportError as ie:
+				frappe.throw(f"Thiếu thư viện PyPDF2 để đọc PDF: {ie}")
+
+			with open(file_path, "rb") as f:
+				reader = PdfReader(f)
+				text = "\n".join((page.extract_text() or "") for page in reader.pages)
 		elif ext in (".docx", ".doc"):
 			from docx import Document
 			d = Document(file_path)

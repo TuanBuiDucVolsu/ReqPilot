@@ -1,10 +1,10 @@
 """
-Claude API Client – giao tiếp với Anthropic Claude API.
+LLM Client – giao tiếp với Groq (OpenAI-compatible) API.
 Hỗ trợ streaming để hiển thị response real-time trên frontend.
 """
 import json
 import frappe
-import anthropic
+from groq import Groq
 
 # ── System prompt template ────────────────────────────────────────────────────
 _SYSTEM_TEMPLATE = """\
@@ -85,19 +85,20 @@ Sau JSON, hãy trình bày tóm tắt dễ đọc và đặt các câu hỏi là
 """
 
 
-def get_client() -> anthropic.Anthropic:
+def get_client() -> Groq:
 	settings = frappe.get_single("Reqpilot Settings")
 	api_key = settings.get_password("claude_api_key")
 	if not api_key:
-		frappe.throw("Chưa cấu hình Claude API Key trong Reqpilot Settings")
-	return anthropic.Anthropic(api_key=api_key)
+		frappe.throw("Chưa cấu hình API Key (Groq) trong Reqpilot Settings")
+	return Groq(api_key=api_key)
 
 
 def get_settings() -> dict:
 	settings = frappe.get_single("Reqpilot Settings")
 	return {
-		"model": settings.claude_model or "claude-sonnet-4-6",
+		"model": settings.claude_model or "llama-3.3-70b-versatile",
 		"max_tokens": settings.max_tokens or 8192,
+		"temperature": settings.temperature or 0.3,
 	}
 
 
@@ -131,17 +132,22 @@ def analyze_requirements(project_name: str) -> dict:
 	cfg = get_settings()
 	system_prompt = build_system_prompt(project)
 
-	response = client.messages.create(
+	messages = [
+		{"role": "system", "content": system_prompt},
+		{
+			"role": "user",
+			"content": _ANALYZE_PROMPT.format(requirement_text=requirement_text),
+		},
+	]
+
+	response = client.chat.completions.create(
 		model=cfg["model"],
 		max_tokens=cfg["max_tokens"],
-		system=system_prompt,
-		messages=[{
-			"role": "user",
-			"content": _ANALYZE_PROMPT.format(requirement_text=requirement_text)
-		}]
+		temperature=cfg["temperature"],
+		messages=messages,
 	)
 
-	assistant_text = response.content[0].text
+	assistant_text = response.choices[0].message.content
 
 	# Parse JSON từ response
 	parsed = _extract_json(assistant_text)
@@ -190,17 +196,18 @@ def chat(project_name: str, user_message: str) -> str:
 	system_prompt = build_system_prompt(project)
 
 	# Build messages history từ chat_messages
-	messages = _build_messages_history(project)
-	messages.append({"role": "user", "content": user_message})
+	history = _build_messages_history(project)
+	history.append({"role": "user", "content": user_message})
+	messages = [{"role": "system", "content": system_prompt}, *history]
 
-	response = client.messages.create(
+	response = client.chat.completions.create(
 		model=cfg["model"],
 		max_tokens=cfg["max_tokens"],
-		system=system_prompt,
-		messages=messages
+		temperature=cfg["temperature"],
+		messages=messages,
 	)
 
-	assistant_text = response.content[0].text
+	assistant_text = response.choices[0].message.content
 
 	# Lưu cả 2 message
 	_save_message(project, "user", "message", user_message)
@@ -223,17 +230,21 @@ def stream_chat(project_name: str, user_message: str):
 	cfg = get_settings()
 	system_prompt = build_system_prompt(project)
 
-	messages = _build_messages_history(project)
-	messages.append({"role": "user", "content": user_message})
+	history = _build_messages_history(project)
+	history.append({"role": "user", "content": user_message})
+	messages = [{"role": "system", "content": system_prompt}, *history]
 
-	full_text = []
-	with client.messages.stream(
+	full_text: list[str] = []
+	for chunk in client.chat.completions.create(
 		model=cfg["model"],
 		max_tokens=cfg["max_tokens"],
-		system=system_prompt,
-		messages=messages
-	) as stream:
-		for text_chunk in stream.text_stream:
+		temperature=cfg["temperature"],
+		messages=messages,
+		stream=True,
+	):
+		delta = chunk.choices[0].delta
+		text_chunk = getattr(delta, "content", None) or ""
+		if text_chunk:
 			full_text.append(text_chunk)
 			yield text_chunk
 
@@ -255,8 +266,8 @@ def generate_srs_prompt(project_name: str) -> str:
 	cfg = get_settings()
 	system_prompt = build_system_prompt(project)
 
-	messages = _build_messages_history(project)
-	messages.append({
+	history = _build_messages_history(project)
+	history.append({
 		"role": "user",
 		"content": (
 			"Dựa trên toàn bộ phân tích và làm rõ ở trên, hãy viết tài liệu SRS đầy đủ theo cấu trúc:\n\n"
@@ -270,17 +281,18 @@ def generate_srs_prompt(project_name: str) -> str:
 			"- Custom field cần bổ sung mới\n"
 			"- Câu hỏi còn chưa làm rõ (nếu có)\n\n"
 			"Trả lời bằng Markdown có cấu trúc rõ ràng."
-		)
+		),
 	})
+	messages = [{"role": "system", "content": system_prompt}, *history]
 
-	response = client.messages.create(
+	response = client.chat.completions.create(
 		model=cfg["model"],
 		max_tokens=cfg["max_tokens"],
-		system=system_prompt,
-		messages=messages
+		temperature=cfg["temperature"],
+		messages=messages,
 	)
 
-	srs_text = response.content[0].text
+	srs_text = response.choices[0].message.content
 	_save_message(project, "assistant", "summary", srs_text)
 	project.save(ignore_permissions=True)
 	frappe.db.commit()
@@ -307,9 +319,14 @@ def _get_requirement_text(project) -> str:
 
 def _extract_pdf(path: str) -> str:
 	try:
-		import fitz  # pymupdf
-		doc = fitz.open(path)
-		return "\n".join(page.get_text() for page in doc)
+		from PyPDF2 import PdfReader
+	except ImportError as ie:
+		return f"[Thiếu thư viện PyPDF2 để đọc PDF: {ie}]"
+
+	try:
+		with open(path, "rb") as f:
+			reader = PdfReader(f)
+			return "\n".join((page.extract_text() or "") for page in reader.pages)
 	except Exception as e:
 		return f"[Không đọc được PDF: {e}]"
 
@@ -324,7 +341,7 @@ def _extract_docx(path: str) -> str:
 
 
 def _build_messages_history(project) -> list:
-	"""Chuyển chat_messages table thành list messages cho Claude API."""
+	"""Chuyển chat_messages table thành list messages cho LLM API."""
 	messages = []
 	for msg in project.chat_messages:
 		if msg.role in ("user", "assistant"):
