@@ -65,7 +65,8 @@
    "fieldname": "base_apps",
    "fieldtype": "Small Text",
    "label": "Base Apps (mỗi dòng 1 app)",
-   "description": "Danh sách app nền tảng cần index, ví dụ: mbwnext_advanced_selling"
+   "description": "Danh sách app nền tảng cần index, ví dụ: mbwnext_advanced_selling",
+   "default": "mbwnext_advanced_selling\nmbwnext_advanced_buying\nmbwnext_advanced_stock\nmbwnext_advanced_accounting\nmbwnext_localization"
   },
   {
    "fieldname": "last_indexed",
