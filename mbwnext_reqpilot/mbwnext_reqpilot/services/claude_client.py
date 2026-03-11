@@ -125,6 +125,13 @@ def analyze_requirements(project_name: str) -> dict:
 	project = frappe.get_doc("SRS Project", project_name)
 	requirement_text = _get_requirement_text(project)
 
+	# Giảm rủi ro vượt giới hạn token của model
+	MAX_CHARS = 10000
+	is_truncated = False
+	if len(requirement_text) > MAX_CHARS:
+		requirement_text = requirement_text[:MAX_CHARS]
+		is_truncated = True
+
 	if not requirement_text:
 		frappe.throw("Chưa có nội dung yêu cầu. Hãy upload file hoặc nhập text.")
 
@@ -132,11 +139,18 @@ def analyze_requirements(project_name: str) -> dict:
 	cfg = get_settings()
 	system_prompt = build_system_prompt(project)
 
+	user_content = _ANALYZE_PROMPT.format(requirement_text=requirement_text)
+	if is_truncated:
+		user_content += (
+			"\n\n[Lưu ý: Tài liệu gốc dài hơn giới hạn cho phép nên đã được cắt bớt phần cuối. "
+			"Hãy phân tích trên phần đã thấy và nếu cần thêm thông tin, hãy liệt kê rõ những phần còn thiếu.]"
+		)
+
 	messages = [
 		{"role": "system", "content": system_prompt},
 		{
 			"role": "user",
-			"content": _ANALYZE_PROMPT.format(requirement_text=requirement_text),
+			"content": user_content,
 		},
 	]
 

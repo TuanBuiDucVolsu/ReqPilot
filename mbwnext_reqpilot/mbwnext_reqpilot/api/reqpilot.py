@@ -74,6 +74,15 @@ def create_project(project_name: str, customer: str = "", custom_app_name: str =
 
 
 @frappe.whitelist()
+def delete_project(project_name: str):
+	"""Xóa 1 SRS Project."""
+	doc = frappe.get_doc("SRS Project", project_name)
+	doc.delete(ignore_permissions=True)
+	frappe.db.commit()
+	return {"status": "ok"}
+
+
+@frappe.whitelist()
 def update_requirement_text(project_name: str, text: str):
 	"""Cập nhật requirement_text."""
 	doc = frappe.get_doc("SRS Project", project_name)
@@ -104,6 +113,7 @@ def extract_file_text(project_name: str, file_url: str):
 	Đọc nội dung file (PDF/DOCX) đã upload và lưu vào requirement_text.
 	"""
 	import os
+	import textwrap
 	try:
 		file_doc = frappe.get_doc("File", {"file_url": file_url})
 		file_path = file_doc.get_full_path()
@@ -118,11 +128,14 @@ def extract_file_text(project_name: str, file_url: str):
 
 			with open(file_path, "rb") as f:
 				reader = PdfReader(f)
-				text = "\n".join((page.extract_text() or "") for page in reader.pages)
+				raw = "\n".join((page.extract_text() or "") for page in reader.pages)
+				# Gộp các dòng liên tiếp thành đoạn, tránh xuống dòng giữa mỗi chữ
+				text = _normalize_paragraphs(raw)
 		elif ext in (".docx", ".doc"):
 			from docx import Document
 			d = Document(file_path)
-			text = "\n".join(p.text for p in d.paragraphs)
+			raw = "\n".join(p.text for p in d.paragraphs)
+			text = _normalize_paragraphs(raw)
 		else:
 			frappe.throw(f"Định dạng file không hỗ trợ: {ext}")
 
@@ -139,6 +152,28 @@ def extract_file_text(project_name: str, file_url: str):
 		return {"status": "error", "message": str(e)}
 
 
+def _normalize_paragraphs(raw: str) -> str:
+	"""Gộp các dòng liên tiếp thành đoạn văn, giữ lại khoảng trắng hợp lý."""
+	lines = [ln.strip() for ln in (raw or "").splitlines()]
+	paragraphs = []
+	buf = []
+
+	for ln in lines:
+		# Dòng trống: kết thúc một đoạn
+		if not ln:
+			if buf:
+				paragraphs.append(" ".join(buf))
+				buf = []
+			continue
+		buf.append(ln)
+
+	if buf:
+		paragraphs.append(" ".join(buf))
+
+	# Giới hạn chiều rộng hiển thị để dễ đọc, nhưng vẫn là text thuần
+	return "\n\n".join(paragraphs)
+
+
 # ── AI Analysis ───────────────────────────────────────────────────────────────
 
 @frappe.whitelist()
@@ -152,8 +187,18 @@ def analyze(project_name: str):
 		result = analyze_requirements(project_name)
 		return {"status": "ok", **result}
 	except Exception as e:
-		frappe.log_error(str(e), "ReqPilot Analyze")
-		return {"status": "error", "message": str(e)}
+		msg = str(e)
+		if "Request too large for model" in msg or "code: 413" in msg:
+			user_msg = (
+				"Tài liệu hoặc context hiện tại quá dài so với giới hạn của mô hình LLM. "
+				"Hãy chia nhỏ tài liệu, bớt phần không cần thiết hoặc chạy lại cho từng module."
+			)
+		else:
+			user_msg = msg
+
+		# Tránh lỗi Error Log do title quá dài
+		frappe.log_error(message=user_msg[:1000], title="ReqPilot Analyze")
+		return {"status": "error", "message": user_msg}
 
 
 @frappe.whitelist()
@@ -210,8 +255,18 @@ def generate_srs(project_name: str):
 		file_url = generate(project_name)
 		return {"status": "ok", "file_url": file_url}
 	except Exception as e:
-		frappe.log_error(str(e), "ReqPilot Generate SRS")
-		return {"status": "error", "message": str(e)}
+		msg = str(e)
+		if "Rate limit reached for model" in msg or "code: 429" in msg:
+			user_msg = (
+				"Bạn đã chạm giới hạn số token/ngày của model LLM trên Groq. "
+				"Hãy đợi thêm một lúc (khoảng 1–2 giờ) rồi thử lại, "
+				"hoặc chuyển sang model khác / nâng gói trên Groq."
+			)
+		else:
+			user_msg = msg
+
+		frappe.log_error(message=user_msg[:1000], title="ReqPilot Generate SRS")
+		return {"status": "error", "message": user_msg}
 
 
 # ── Chat History ──────────────────────────────────────────────────────────────

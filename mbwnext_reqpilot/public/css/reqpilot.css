@@ -1,12 +1,26 @@
 /* ── ReqPilot Global Layout ─────────────────────────────────── */
+/* Theme tokens – AI style */
+:root {
+  /* Lighter, friendlier AI theme */
+  --rp-bg-gradient: radial-gradient(circle at 0 0, #e0f2fe 0, #bfdbfe 35%, #1d4ed8 100%);
+  --rp-surface: #ffffff;
+  --rp-surface-soft: #f9fafb;
+  --rp-border: rgba(148, 163, 184, 0.35);
+  --rp-accent: #38bdf8;
+  --rp-accent-soft: rgba(56, 189, 248, 0.15);
+  --rp-muted: #9ca3af;
+  --rp-text: #e5e7eb;
+}
+
 #reqpilot-root {
   height: calc(100vh - 80px);
   display: flex;
   flex-direction: column;
   font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
-  padding: 8px 12px;
+  padding: 16px 20px;
   box-sizing: border-box;
-  background: radial-gradient(circle at top left, #edf2ff 0, #f7fafc 45%, #ffffff 100%);
+  background: var(--rp-bg-gradient);
+  color: var(--rp-text);
 }
 
 /* ── Workspace ──────────────────────────────────────────────── */
@@ -17,17 +31,21 @@
   gap: 0;
   height: 100%;
   width: 100%;
-  border: 1px solid var(--border-color, #e2e8f0);
-  border-radius: 14px;
+  border: 1px solid var(--rp-border);
+  border-radius: 18px;
   overflow: hidden;
-  background: white;
-  box-shadow: 0 18px 45px rgba(15, 23, 42, 0.18);
+  background: linear-gradient(135deg, #ffffff, #f9fafb);
+  box-shadow:
+    0 18px 45px rgba(15, 23, 42, 0.25),
+    0 0 0 1px rgba(148,163,184,0.15);
+  backdrop-filter: blur(12px);
 }
 
 /* ── Sidebar (trái) ─────────────────────────────────────────── */
 .rp-sidebar {
-  background: var(--fg-color, #f8fafc);
-  border-right: 1px solid var(--border-color, #e2e8f0);
+  /* Sidebar sáng, tương phản cao để dễ đọc chữ */
+  background: #f3f4f6;
+  border-right: 1px solid #e2e8f0;
   display: flex;
   flex-direction: column;
   overflow-y: auto;
@@ -42,19 +60,19 @@
   font-size: 11px;
   font-weight: 600;
   text-transform: uppercase;
-  color: var(--text-muted, #718096);
+  color: #4b5563;
   margin-bottom: 8px;
   letter-spacing: 0.5px;
 }
 .rp-project-name {
   font-size: 14px;
   font-weight: 600;
-  color: var(--text-color, #1a202c);
+  color: #111827;
   margin-bottom: 4px;
 }
 .rp-project-customer {
   font-size: 12px;
-  color: var(--text-muted, #718096);
+  color: #4b5563;
 }
 .rp-status-badge {
   display: inline-block;
@@ -71,8 +89,8 @@
 
 .rp-app-tag {
   display: inline-block;
-  background: #EBF4FF;
-  color: #2C5282;
+  background: #dbeafe;
+  color: #1d4ed8;
   border-radius: 4px;
   padding: 2px 6px;
   font-size: 11px;
@@ -98,7 +116,7 @@
 }
 .rp-progress-text {
   font-size: 11px;
-  color: var(--text-muted, #718096);
+  color: var(--rp-muted);
   margin-top: 2px;
 }
 
@@ -109,21 +127,45 @@
   margin-bottom: 4px;
   border-radius: 4px;
   cursor: pointer;
-  border: 1px solid var(--border-color, #e2e8f0);
-  background: white;
+  border: 1px solid #d1d5db;
+  background: #f9fafb;
+  color: #111827;
   text-align: left;
   transition: all 0.15s;
 }
-.rp-sidebar-btn:hover { background: var(--bg-blue, #EBF8FF); border-color: #90cdf4; }
+.rp-sidebar-btn:hover {
+  background: #e5e7eb;
+  border-color: #9ca3af;
+}
 .rp-sidebar-btn.primary {
-  background: #3182ce; color: white; border-color: #3182ce;
+  background: linear-gradient(135deg,#38bdf8,#6366f1);
+  color: white;
+  border-color: transparent;
+  box-shadow: 0 10px 30px rgba(37,99,235,0.45);
 }
-.rp-sidebar-btn.primary:hover { background: #2b6cb0; }
+.rp-sidebar-btn.primary:hover {
+  filter: brightness(1.05);
+  transform: translateY(-0.5px);
+}
 .rp-sidebar-btn.success {
-  background: #38a169; color: white; border-color: #38a169;
+  background: linear-gradient(135deg,#22c55e,#16a34a);
+  color: white;
+  border-color: transparent;
+  box-shadow: 0 10px 30px rgba(22,163,74,0.45);
 }
-.rp-sidebar-btn.success:hover { background: #276749; }
+.rp-sidebar-btn.success:hover { filter: brightness(1.05); transform: translateY(-0.5px); }
 .rp-sidebar-btn:disabled { opacity: 0.5; cursor: not-allowed; }
+
+/* Danger action (Xóa & làm lại) */
+.rp-sidebar-btn.danger {
+  background: #fee2e2;
+  border-color: #fecaca;
+  color: #b91c1c;
+}
+.rp-sidebar-btn.danger:hover {
+  background: #fecaca;
+  border-color: #f97373;
+}
 
 /* ── Chat Area (giữa) ───────────────────────────────────────── */
 .rp-chat-area {
@@ -310,29 +352,33 @@
 /* ── Project List (màn hình trước khi chọn project) ─────────── */
 .rp-project-list {
   width: 100%;
-  padding: 16px 12px;
+  padding: 24px 20px;
+  color: var(--rp-text);
 }
 .rp-project-list h4 {
   font-size: 18px; font-weight: 600;
-  margin-bottom: 16px; color: var(--text-color, #1a202c);
+  margin-bottom: 16px;
+  color: #f9fafb;
+  text-shadow: 0 2px 8px rgba(15,23,42,0.9);
 }
 .rp-project-card {
-  border: 1px solid var(--border-color, #e2e8f0);
-  border-radius: 8px;
+  border: 1px solid rgba(148,163,184,0.5);
+  border-radius: 12px;
   padding: 14px 16px;
   margin-bottom: 10px;
-  background: white;
+  background: radial-gradient(circle at top left, rgba(15,23,42,0.95), rgba(15,23,42,0.9));
   cursor: pointer;
   transition: all 0.15s;
   display: flex; align-items: center; justify-content: space-between;
 }
 .rp-project-card:hover {
-  border-color: #90cdf4; background: #EBF8FF;
-  transform: translateY(-1px);
-  box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+  border-color: var(--rp-accent);
+  background: radial-gradient(circle at top left, rgba(56,189,248,0.25), rgba(15,23,42,0.95));
+  transform: translateY(-1px) translateZ(0);
+  box-shadow: 0 10px 30px rgba(15,23,42,0.8);
 }
-.rp-project-card-title { font-size: 14px; font-weight: 600; }
-.rp-project-card-meta { font-size: 12px; color: var(--text-muted, #718096); margin-top: 2px; }
+.rp-project-card-title { font-size: 14px; font-weight: 600; color:#f9fafb; }
+.rp-project-card-meta { font-size: 12px; color: var(--rp-muted); margin-top: 2px; }
 
 /* New Project Modal */
 .rp-modal-overlay {
@@ -342,23 +388,74 @@
   z-index: 1000;
 }
 .rp-modal {
-  background: white;
+  background: radial-gradient(circle at top, #ffffff, #f9fafb);
   border-radius: 12px;
   padding: 24px;
   width: 480px;
   max-width: 95vw;
-  box-shadow: 0 20px 60px rgba(0,0,0,0.2);
+  box-shadow:
+    0 24px 60px rgba(15,23,42,0.55),
+    0 0 0 1px rgba(148,163,184,0.25);
 }
 .rp-modal h5 { font-size: 16px; font-weight: 600; margin-bottom: 16px; }
-.rp-form-group { margin-bottom: 12px; }
+.rp-form-group { margin-bottom: 14px; }
 .rp-form-group label { display: block; font-size: 12px; font-weight: 600; margin-bottom: 4px; color: var(--text-muted, #718096); }
 .rp-form-group input, .rp-form-group select {
   width: 100%; padding: 8px 10px;
   border: 1px solid var(--border-color, #e2e8f0); border-radius: 6px;
   font-size: 13px; outline: none;
+  background: #f9fafb;
 }
 .rp-form-group input:focus, .rp-form-group select:focus { border-color: #3182ce; }
-.rp-modal-actions { display: flex; gap: 8px; justify-content: flex-end; margin-top: 16px; }
+.rp-modal-actions {
+  display: flex;
+  gap: 8px;
+  justify-content: flex-end;
+  margin-top: 20px;
+}
+.rp-modal-actions .rp-sidebar-btn {
+  width: auto;
+  min-width: 90px;
+  text-align: center;
+  background: linear-gradient(135deg,#f9fafb,#e5e7eb);
+  color: #111827;
+  border-color: rgba(148,163,184,0.7);
+}
+.rp-modal-actions .rp-sidebar-btn.primary {
+  padding: 8px 18px;
+  background: linear-gradient(135deg,#60a5fa,#6366f1);
+  color: #ffffff;
+}
+
+/* Custom checkboxes – simple, dễ nhìn */
+.rp-checkbox {
+  appearance: none;
+  -webkit-appearance: none;
+  width: 14px;
+  height: 14px;
+  border-radius: 3px;
+  border: 1px solid #9ca3af;
+  background: #ffffff;
+  cursor: pointer;
+  display: inline-block;
+  position: relative;
+}
+.rp-checkbox:checked {
+  background-color: #3b82f6;
+  border-color: #2563eb;
+}
+.rp-checkbox:checked::after {
+  content: "";
+  position: absolute;
+  left: 3px;
+  top: 1px;
+  width: 6px;
+  height: 8px;
+  border: 2px solid #ffffff;
+  border-top: none;
+  border-left: none;
+  transform: rotate(45deg);
+}
 
 /* Upload area */
 .rp-upload-area {

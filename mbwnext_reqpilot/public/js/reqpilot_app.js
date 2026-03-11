@@ -118,6 +118,18 @@
         } catch (_) {}
       },
 
+      async deleteProject(name) {
+        frappe.confirm("Xóa dự án này và toàn bộ lịch sử phân tích/trao đổi?", async () => {
+          await api.call("delete_project", { project_name: name });
+          frappe.show_alert({ message: "Đã xóa dự án", indicator: "red" });
+          await this.loadProjects();
+          if (this.project && this.project.name === name) {
+            this.project = null;
+            this.view = "list";
+          }
+        });
+      },
+
       async openProject(name) {
         this.project = await api.call("get_project", { project_name: name });
         this.messages = await api.call("get_chat_history", { project_name: name });
@@ -208,8 +220,8 @@
             file_url: fileUrl,
           });
           if (extracted.status === "ok") {
+            // Không tự đổ text vào ô nhập nữa, chỉ báo đã đọc file.
             frappe.show_alert({ message: `Đã đọc file: ${file.name}`, indicator: "green" });
-            this.project.requirement_text = extracted.text + "...";
           } else {
             frappe.msgprint("Lỗi đọc file: " + (extracted.message || "Không xác định"));
           }
@@ -376,19 +388,24 @@
 <div id="reqpilot-root">
 
   <!-- ══ PROJECT LIST VIEW ════════════════════════════════════ -->
-  <div v-if="view === 'list'" class="rp-project-list">
+    <div v-if="view === 'list'" class="rp-project-list">
     <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:20px">
-      <h4 style="margin:0">🧠 ReqPilot – BA AI</h4>
+      <h4 style="margin:0">🧠 MBWNext – Support SRS for BA</h4>
       <button class="rp-sidebar-btn primary" style="width:auto;padding:8px 16px"
               @click="showNewModal=true">+ Dự án mới</button>
     </div>
 
-    <div v-if="loadingProjects" style="text-align:center;padding:40px;color:#718096">
+    <div v-if="loadingProjects" style="text-align:center;padding:40px;color:#ffffff;text-shadow:0 1px 4px rgba(15,23,42,0.9)">
       Đang tải...
     </div>
-    <div v-else-if="!projects.length" style="text-align:center;padding:40px;color:#718096">
-      <p style="font-size:32px">🗂️</p>
-      <p>Chưa có dự án nào. Tạo dự án mới để bắt đầu.</p>
+    <div v-else-if="!projects.length" style="text-align:center;padding:60px 40px;color:#ffffff;text-shadow:0 1px 4px rgba(15,23,42,0.9)">
+      <p style="margin-bottom:10px">
+        <img src="/assets/mbwnext_localization/logo.png"
+             alt="MBWNext"
+             style="height:40px;filter:drop-shadow(0 5px 14px rgba(15,23,42,0.8));">
+      </p>
+      <p style="font-size:14px;font-weight:600;margin-bottom:4px">Chưa có dự án nào</p>
+      <p style="font-size:12px;opacity:0.9">Nhấn <strong>“+ Dự án mới”</strong> để bắt đầu.</p>
     </div>
     <div v-else>
       <div v-for="p in projects" :key="p.name"
@@ -400,9 +417,17 @@
             · {{ p.custom_app_name || '' }}
           </div>
         </div>
-        <span :class="'rp-status-badge ' + (p.status||'draft').toLowerCase()">
-          {{ statusLabel(p.status) }}
-        </span>
+        <div style="display:flex;align-items:center;gap:6px">
+          <span :class="'rp-status-badge ' + (p.status||'draft').toLowerCase()">
+            {{ statusLabel(p.status) }}
+          </span>
+          <button
+            @click.stop="deleteProject(p.name)"
+            style="border:none;background:transparent;color:#ef4444;font-size:14px;cursor:pointer;padding:2px 4px"
+            title="Xóa dự án">
+            🗑
+          </button>
+        </div>
       </div>
     </div>
   </div>
@@ -470,8 +495,9 @@
         <textarea v-if="project"
           v-model="project.requirement_text"
           placeholder="Hoặc nhập/paste yêu cầu trực tiếp..."
-          style="width:100%;font-size:12px;border:1px solid #e2e8f0;border-radius:6px;
-                 padding:6px 8px;resize:vertical;min-height:80px;outline:none;font-family:inherit">
+          style="width:100%;font-size:13px;line-height:1.5;border:1px solid #e2e8f0;border-radius:6px;
+                 padding:8px 10px;resize:vertical;min-height:180px;outline:none;
+                 font-family:ui-monospace,SFMono-Regular,Menlo,Monaco,Consolas,'Liberation Mono','Courier New',monospace">
         </textarea>
       </div>
 
@@ -490,7 +516,7 @@
            rel="noopener">
           📥 Tải SRS
         </a>
-        <button class="rp-sidebar-btn" @click="clearChat" :disabled="isLoading">
+        <button class="rp-sidebar-btn danger" @click="clearChat" :disabled="isLoading">
           🗑 Xóa & làm lại
         </button>
       </div>
@@ -510,7 +536,7 @@
         <!-- Welcome -->
         <div v-if="!messages.length" style="text-align:center;padding:40px;color:#718096">
           <p style="font-size:28px">🤖</p>
-          <p style="font-size:14px;font-weight:600">Xin chào! Tôi là BA AI của ReqPilot.</p>
+          <p style="font-size:14px;font-weight:600">Xin chào! Tôi là BA AI của MBWNext.</p>
           <p style="font-size:12px">Upload file yêu cầu hoặc nhập text rồi nhấn<br>
             <strong>"Phân tích yêu cầu"</strong> để bắt đầu.</p>
         </div>
@@ -586,9 +612,9 @@
               </span>
             </div>
             <div style="margin-top:4px;display:flex;gap:6px;align-items:center">
-              <label style="font-size:10px;cursor:pointer;display:flex;align-items:center;gap:3px">
-                <input type="checkbox" :checked="req.clarified"
-                       @click.stop="toggleClarified(req)" style="cursor:pointer">
+              <label style="font-size:10px;cursor:pointer;display:flex;align-items:center;gap:4px">
+                <input type="checkbox" class="rp-checkbox" :checked="req.clarified"
+                       @click.stop="toggleClarified(req)">
                 Đã làm rõ
               </label>
               <span v-if="req.priority" style="font-size:10px;color:#718096">
@@ -633,28 +659,29 @@
 
       <div class="rp-form-group">
         <label>Tên dự án *</label>
-        <input v-model="newForm.project_name" placeholder="VD: Tôn Hòa Thị – Phase 1">
+        <input v-model="newForm.project_name" placeholder="VD: RTG – Phase 1">
       </div>
       <div class="rp-form-group">
         <label>Khách hàng</label>
-        <input v-model="newForm.customer" placeholder="VD: Công ty TNHH Hòa Thị">
+        <input v-model="newForm.customer" placeholder="VD: Công ty Rượu thế giới">
       </div>
       <div class="rp-form-group">
         <label>Custom App Name</label>
-        <input v-model="newForm.custom_app_name" placeholder="VD: mbwnext_tonhoathi">
+        <input v-model="newForm.custom_app_name" placeholder="VD: mbwnext_rtg">
       </div>
 
       <div class="rp-form-group">
         <label>Base Apps khách hàng mua</label>
-        <div style="display:flex;flex-wrap:wrap;gap:6px;margin-top:4px">
+        <div style="display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:6px;margin-top:4px">
           <label v-for="app in availableApps" :key="app.app_name"
-                 style="display:flex;align-items:center;gap:4px;cursor:pointer;
-                        padding:4px 8px;border:1px solid #e2e8f0;border-radius:4px;font-size:12px"
+                 style="display:flex;align-items:center;gap:6px;cursor:pointer;
+                        padding:6px 10px;border:1px solid #e2e8f0;border-radius:6px;font-size:12px"
                  :style="isAppSelected(app.app_name)
-                   ? 'background:#EBF4FF;border-color:#90cdf4;color:#2C5282'
+                   ? 'background:#EEF2FF;border-color:#6366f1;color:#1D4ED8;font-weight:600'
                    : 'background:white'">
-            <input type="checkbox" :checked="isAppSelected(app.app_name)"
-                   @change="toggleApp(app.app_name)" style="cursor:pointer">
+            <input type="checkbox" class="rp-checkbox"
+                   :checked="isAppSelected(app.app_name)"
+                   @change="toggleApp(app.app_name)">
             {{ app.app_title || app.app_name }}
           </label>
         </div>
